@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>PredictX - Football Predictions</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #07111f;
+      color: white;
+      min-height: 100vh;
+    }
+
+    header {
+      height: 70px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0a1729;
+      border-bottom: 1px solid #1d3048;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-size: 27px;
+      font-weight: 900;
+    }
+
+    .logo span {
+      color: #8b5cf6;
+    }
+
+    .live {
+      font-size: 13px;
+      color: #4ade80;
+      font-weight: bold;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 55px 20px 35px;
+    }
+
+    .hero h1 {
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 span {
+      color: #8b5cf6;
+    }
+
+    .hero p {
+      color: #9aaac0;
+      font-size: 16px;
+      max-width: 600px;
+      margin: auto;
+      line-height: 1.6;
+    }
+
+    .container {
+      width: 92%;
+      max-width: 950px;
+      margin: auto;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .section-title h2 {
+      font-size: 24px;
+    }
+
+    .refresh {
+      border: 0;
+      background: #8b5cf6;
+      color: white;
+      padding: 9px 14px;
+      border-radius: 9px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .match-card {
+      background: #0e1c30;
+      border: 1px solid #203653;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 15px;
+      transition: 0.2s;
+    }
+
+    .match-card:hover {
+      transform: translateY(-2px);
+      border-color: #8b5cf6;
+    }
+
+    .match-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .league {
+      color: #a6b4c8;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status {
+      color: #4ade80;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status.live {
+      color: #ef4444;
+    }
+
+    .match {
+      display: grid;
+      grid-template-columns: 1fr 110px 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      font-weight: bold;
+    }
+
+    .team img {
+      width: 55px;
+      height: 55px;
+      object-fit: contain;
+    }
+
+    .team-name {
+      font-size: 14px;
+      line-height: 1.3;
+    }
+
+    .score-area {
+      text-align: center;
+    }
+
+    .score {
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .vs {
+      color: #71839a;
+      font-size: 13px;
+      margin: 5px 0;
+    }
+
+    .match-date {
+      text-align: center;
+      margin-top: 18px;
+      color: #7789a1;
+      font-size: 12px;
+    }
+
+    .loading,
+    .error,
+    .empty {
+      background: #0e1c30;
+      border: 1px solid #203653;
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      color: #9aaac0;
+    }
+
+    .error {
+      color: #f87171;
+    }
+
+    footer {
+      text-align: center;
+      padding: 55px 20px 30px;
+      color: #63758d;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 34px;
+      }
+
+      .match {
+        grid-template-columns: 1fr 80px 1fr;
+      }
+
+      .team img {
+        width: 45px;
+        height: 45px;
+      }
+
+      .team-name {
+        font-size: 12px;
+      }
+
+      .score {
+        font-size: 23px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">Predict<span>X</span></div>
+    <div class="live">● LIVE DATA</div>
+  </header>
+
+  <section class="hero">
+    <h1>Football <span>Predictions</span></h1>
+
+    <p>
+      Follow football matches, scores and statistics
+      with PredictX.
+    </p>
+  </section>
+
+  <main class="container">
+
+    <div class="section-title">
+      <h2>Today's Matches</h2>
+
+      <button class="refresh" onclick="loadMatches()">
+        Refresh
+      </button>
+    </div>
+
+    <div id="matchList">
+      <div class="loading">
+        ⚽ Loading matches...
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    © 2026 PredictX — Football analysis platform
+  </footer>
+
+
+  <script>
+
+    const API_URL =
+      "https://predictx-backend.vercel.app/api/fixtures";
+
+
+    async function loadMatches() {
+
+      const matchList =
+        document.getElementById("matchList");
+
+      matchList.innerHTML = `
+        <div class="loading">
+          ⚽ Loading matches...
+        </div>
+      `;
+
+
+      try {
+
+        const today =
+          new Date().toISOString().split("T")[0];
+
+
+        const response =
+          await fetch(`${API_URL}?date=${today}`);
+
+
+        if (!response.ok) {
+          throw new Error(
+            "API request failed"
+          );
+        }
+
+
+        const data =
+          await response.json();
+
+
+        const fixtures =
+          data.response || [];
+
+
+        if (fixtures.length === 0) {
+
+          matchList.innerHTML = `
+            <div class="empty">
+              No matches available today.
+            </div>
+          `;
+
+          return;
+        }
+
+
+        matchList.innerHTML =
+          fixtures.slice(0, 20).map(match => {
+
+
+            const home =
+              match.teams?.home?.name ||
+              "Home";
+
+
+            const away =
+              match.teams?.away?.name ||
+              "Away";
+
+
+            const homeLogo =
+              match.teams?.home?.logo ||
+              "";
+
+
+            const awayLogo =
+              match.teams?.away?.logo ||
+              "";
+
+
+            const homeScore =
+              match.goals?.home ?? "-";
+
+
+            const awayScore =
+              match.goals?.away ?? "-";
+
+
+            const statusCode =
+              match.fixture?.status?.short ||
+              "NS";
+
+
+            const elapsed =
+              match.fixture?.status?.elapsed;
+
+
+            const fixtureDate =
+              match.fixture?.date
+                ? new Date(match.fixture.date)
+                : null;
+
+
+            let statusText = "";
+
+
+            if (
+              statusCode === "LIVE" ||
+              statusCode === "1H" ||
+              statusCode === "2H"
+            ) {
+
+              statusText =
+                elapsed
+                  ? `● LIVE ${elapsed}'`
+                  : "● LIVE";
+
+            } else if (statusCode === "FT") {
+
+              statusText =
+                "FULL TIME";
+
+            } else if (statusCode === "HT") {
+
+              statusText =
+                "HALF TIME";
+
+            } else if (fixtureDate) {
+
+              statusText =
+                fixtureDate.toLocaleTimeString(
+                  [],
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  }
+                );
+
+            } else {
+
+              statusText =
+                "UPCOMING";
+            }
+
+
+            const dateText =
+              fixtureDate
+                ? fixtureDate.toLocaleDateString(
+                    [],
+                    {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric"
+                    }
+                  )
+                : "";
+
+
+            return `
+
+              <div class="match-card">
+
+                <div class="match-top">
+
+                  <span class="league">
+                    ${
+                      match.league?.name ||
+                      "Football"
+                    }
+                  </span>
+
+                  <span class="status ${
+                    statusCode === "LIVE" ||
+                    statusCode === "1H" ||
+                    statusCode === "2H"
+                      ? "live"
+                      : ""
+                  }">
+
+                    ${statusText}
+
+                  </span>
+
+                </div>
+
+
+                <div class="match">
+
+                  <div class="team">
+
+                    <img
+                      src="${homeLogo}"
+                      alt="${home}"
+                      onerror="this.style.display='none'"
+                    >
+
+                    <div class="team-name">
+                      ${home}
+                    </div>
+
+                  </div>
+
+
+                  <div class="score-area">
+
+                    <div class="score">
+                      ${homeScore} - ${awayScore}
+                    </div>
+
+                    <div class="vs">
+                      ${
+                        statusCode === "NS"
+                          ? "VS"
+                          : ""
+                      }
+                    </div>
+
+                  </div>
+
+
+                  <div class="team">
+
+                    <img
+                      src="${awayLogo}"
+                      alt="${away}"
+                      onerror="this.style.display='none'"
+                    >
+
+                    <div class="team-name">
+                      ${away}
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <div class="match-date">
+                  ${dateText}
+                </div>
+
+              </div>
+
+            `;
+
+          }).join("");
+
+
+      } catch (error) {
+
+        console.error(error);
+
+
+        matchList.innerHTML = `
+
+          <div class="error">
+
+            ⚠️ Unable to load matches.
+
+            <br><br>
+
+            Please try refreshing.
+
+          </div>
+
+        `;
+
+      }
+
+    }
+
+
+    loadMatches();
+
+  </script>
+
+</body>
+  </html>
