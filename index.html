@@ -226,7 +226,31 @@
       .score {
         font-size: 23px;
       }
-    }
+    }.league-selector {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 18px 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.league-btn {
+  background: #0f1c30;
+  color: white;
+  border: 1px solid #1d3150;
+  border-radius: 20px;
+  padding: 10px 16px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.league-btn.active {
+  background: #8b5cf6;
+  border-color: #8b5cf6;
+      }
   </style>
 </head>
 
@@ -246,7 +270,17 @@
     </p>
   </section>
 
-  <main class="container">
+<div class="league-selector">
+  <button class="league-btn active" onclick="selectLeague('', this)">All</button>
+  <button class="league-btn" onclick="selectLeague('39', this)">Premier League</button>
+  <button class="league-btn" onclick="selectLeague('140', this)">La Liga</button>
+  <button class="league-btn" onclick="selectLeague('78', this)">Bundesliga</button>
+  <button class="league-btn" onclick="selectLeague('135', this)">Serie A</button>
+  <button class="league-btn" onclick="selectLeague('61', this)">Ligue 1</button>
+  <button class="league-btn" onclick="selectLeague('288', this)">PSL</button>
+</div>
+
+<main class="container">
 
     <div class="section-title">
       <h2>Today's Matches</h2>
