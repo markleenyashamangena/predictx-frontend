@@ -627,21 +627,42 @@ const response = await fetch(
 
   try {
 
-    let url = `${API_URL}?next=20`;
+    const upcomingFixtures = [];
 
-    if (selectedLeague) {
-      url += `&league=${selectedLeague}`;
-    }
+for (let i = 1; i <= 7; i++) {
 
-    const response = await fetch(url);
+  const date = new Date();
 
-    if (!response.ok) {
-      throw new Error("API request failed");
-    }
+  date.setDate(date.getDate() + i);
 
-    const data = await response.json();
+  const formattedDate =
+    date.toISOString().split("T")[0];
 
-    const fixtures = data.response || [];
+  let url =
+    `${API_URL}?date=${formattedDate}`;
+
+  if (selectedLeague) {
+    url += `&league=${selectedLeague}`;
+  }
+
+  const response =
+    await fetch(url);
+
+  if (!response.ok) {
+    continue;
+  }
+
+  const data =
+    await response.json();
+
+  const fixtures =
+    data.response || [];
+
+  upcomingFixtures.push(...fixtures);
+
+}
+
+const fixtures = upcomingFixtures;
 
     if (fixtures.length === 0) {
 
