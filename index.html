@@ -336,66 +336,50 @@ function selectLeague(league, button) {
   loadUpcomingMatches();
 
     }
-    async function loadMatches() {
 
-      const matchList =
-        document.getElementById("matchList");
+      async function loadMatches() {
 
+  const matchList =
+    document.getElementById("matchList");
+
+  matchList.innerHTML = `
+    <div class="loading">
+      ⚽ Loading matches...
+    </div>
+  `;
+
+  try {
+
+    let url = `${API_URL}`;
+
+    if (selectedLeague) {
+      url += `?league=${encodeURIComponent(selectedLeague)}`;
+    }
+
+    console.log("PredictX requesting:", url);
+
+    const response = await fetch(url);
+
+    const data = await response.json();
+
+    console.log("PredictX data:", data);
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "API request failed"
+      );
+    }
+
+    const fixtures = data.response || [];
+
+    if (fixtures.length === 0) {
       matchList.innerHTML = `
-        <div class="loading">
-          ⚽ Loading matches...
+        <div class="empty">
+          No matches available.
         </div>
       `;
-
-
-      try {
-
-        const today =
-          new Date().toISOString().split("T")[0];
-
-
-let url = `${API_URL}?date=${today}`;
-
-if (selectedLeague) {
-  url += `&league=${selectedLeague}`;
-}
-
-const response = await fetch(
-  url,
-  {
-    method: "GET",
-    headers: {
-      "Accept": "application/json"
+      return;
     }
-  }
-);
-
-
-        if (!response.ok) {
-          throw new Error(
-            "API request failed"
-          );
-        }
-
-
-        const data =
-          await response.json();
-
-
-        const fixtures =
-          data.response || [];
-
-
-        if (fixtures.length === 0) {
-
-          matchList.innerHTML = `
-            <div class="empty">
-              No matches available today.
-            </div>
-          `;
-
-          return;
-        }
 
 
         matchList.innerHTML =
@@ -431,12 +415,9 @@ const response = await fetch(
 
 
             const statusCode =
-              match.fixture?.status?.short ||
-              "NS";
+  match.fixture?.status || "TIMED";
 
-
-            const elapsed =
-              match.fixture?.status?.elapsed;
+const elapsed = null;
 
 
             const fixtureDate =
@@ -449,22 +430,20 @@ const response = await fetch(
 
 
             if (
-              statusCode === "LIVE" ||
-              statusCode === "1H" ||
-              statusCode === "2H"
-            ) {
+  statusCode === "IN_PLAY"
+)
 
               statusText =
                 elapsed
                   ? `● LIVE ${elapsed}'`
                   : "● LIVE";
 
-            } else if (statusCode === "FT") {
+            } else if (statusCode === "FINISHED") {
 
               statusText =
                 "FULL TIME";
 
-            } else if (statusCode === "HT") {
+            } else if (statusCode === "PAUSED") {
 
               statusText =
                 "HALF TIME";
@@ -514,9 +493,7 @@ const response = await fetch(
                   </span>
 
                   <span class="status ${
-                    statusCode === "LIVE" ||
-                    statusCode === "1H" ||
-                    statusCode === "2H"
+                    statusCode === "IN_PLAY"
                       ? "live"
                       : ""
                   }">
@@ -552,12 +529,12 @@ const response = await fetch(
                     </div>
 
                     <div class="vs">
-                      ${
-                        statusCode === "NS"
-                          ? "VS"
-                          : ""
-                      }
-                    </div>
+  ${
+    statusCode === "TIMED"
+      ? "VS"
+      : ""
+  }
+</div>
 
                   </div>
 
