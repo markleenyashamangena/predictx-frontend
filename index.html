@@ -425,47 +425,40 @@ const elapsed = null;
                 ? new Date(match.fixture.date)
                 : null;
 
+let statusText = "";
 
-            let statusText = "";
+if (statusCode === "IN_PLAY") {
 
+  statusText =
+    elapsed
+      ? `● LIVE ${elapsed}'`
+      : "● LIVE";
 
-            if (
-  statusCode === "IN_PLAY"
-)
+} else if (statusCode === "FINISHED") {
 
-              statusText =
-                elapsed
-                  ? `● LIVE ${elapsed}'`
-                  : "● LIVE";
+  statusText = "FULL TIME";
 
-            } else if (statusCode === "FINISHED") {
+} else if (statusCode === "PAUSED") {
 
-              statusText =
-                "FULL TIME";
+  statusText = "HALF TIME";
 
-            } else if (statusCode === "PAUSED") {
+} else if (fixtureDate) {
 
-              statusText =
-                "HALF TIME";
+  statusText =
+    fixtureDate.toLocaleTimeString(
+      [],
+      {
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
 
-            } else if (fixtureDate) {
+} else {
 
-              statusText =
-                fixtureDate.toLocaleTimeString(
-                  [],
-                  {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                  }
-                );
+  statusText = "UPCOMING";
 
-            } else {
-
-              statusText =
-                "UPCOMING";
-            }
-
-
+}
+            
             const dateText =
               fixtureDate
                 ? fixtureDate.toLocaleDateString(
